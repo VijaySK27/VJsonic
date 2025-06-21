@@ -235,6 +235,31 @@ export async function createPlaylist(userId: string, name: string, songs: Song[]
   })
 }
 
+export async function renamePlaylist(userId: string, playlistId: string, newName: string): Promise<void> {
+  if (!db) throw new Error("Database not initialized")
+
+  return new Promise((resolve, reject) => {
+    const transaction = db!.transaction([PLAYLISTS_STORE], "readwrite")
+    const store = transaction.objectStore(PLAYLISTS_STORE)
+    const getRequest = store.get(playlistId)
+
+    getRequest.onerror = () => reject(getRequest.error)
+    getRequest.onsuccess = () => {
+      const playlist = getRequest.result
+      if (!playlist || playlist.userId !== userId) {
+        reject(new Error("Playlist not found or access denied"))
+        return
+      }
+
+      playlist.name = newName
+
+      const putRequest = store.put(playlist)
+      putRequest.onerror = () => reject(putRequest.error)
+      putRequest.onsuccess = () => resolve()
+    }
+  })
+}
+
 export async function getPlaylists(userId: string): Promise<Playlist[]> {
   if (!db) throw new Error("Database not initialized")
 

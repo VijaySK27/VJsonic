@@ -91,7 +91,14 @@ export default function Home() {
   const renderContent = () => {
     switch (activeTab) {
       case "home":
-        return <HomePage onPlaySong={playSong} />
+        return (
+          <HomePage
+            onPlaySong={playSong}
+            userId={currentUser.id}
+            playlists={playlists}
+            onPlaylistUpdate={refreshUserData}
+          />
+        )
       case "search":
         return (
           <SearchSection
@@ -137,7 +144,14 @@ export default function Home() {
           </div>
         )
       default:
-        return <HomePage onPlaySong={playSong} />
+        return (
+          <HomePage
+            onPlaySong={playSong}
+            userId={currentUser.id}
+            playlists={playlists}
+            onPlaylistUpdate={refreshUserData}
+          />
+        )
     }
   }
 

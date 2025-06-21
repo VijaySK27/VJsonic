@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Plus, Play, MoreVertical, Trash2, Music, Clock } from "lucide-react"
+import { Plus, Play, MoreVertical, Trash2, Music, Clock, Edit } from "lucide-react"
 import type { Song, Playlist } from "@/types/music"
 import { createPlaylist, deletePlaylist, removeSongFromPlaylist } from "@/lib/indexdb"
 import { toast } from "@/hooks/use-toast"
@@ -23,6 +23,10 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
   const [newPlaylistName, setNewPlaylistName] = useState("")
   const [isCreating, setIsCreating] = useState(false)
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [renamePlaylist, setRenamePlaylist] = useState<Playlist | null>(null)
+  const [renameValue, setRenameValue] = useState("")
+  const [isRenaming, setIsRenaming] = useState(false)
 
   const handleCreatePlaylist = async () => {
     if (!newPlaylistName.trim()) return
@@ -31,6 +35,7 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
     try {
       await createPlaylist(userId, newPlaylistName, [])
       setNewPlaylistName("")
+      setIsDialogOpen(false)
       onPlaylistUpdate()
       toast({
         title: "Playlist Created",
@@ -47,7 +52,40 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
     }
   }
 
+  const handleRenamePlaylist = async () => {
+    if (!renameValue.trim() || !renamePlaylist) return
+
+    setIsRenaming(true)
+    try {
+      await renamePlaylist(userId, renamePlaylist.id, renameValue.trim())
+      setRenamePlaylist(null)
+      setRenameValue("")
+      onPlaylistUpdate()
+      toast({
+        title: "Playlist Renamed",
+        description: `Playlist renamed to "${renameValue}" successfully.`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to rename playlist.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsRenaming(false)
+    }
+  }
+
+  const openRenameDialog = (playlist: Playlist) => {
+    setRenamePlaylist(playlist)
+    setRenameValue(playlist.name)
+  }
+
   const handleDeletePlaylist = async (playlistId: string, playlistName: string) => {
+    if (!confirm(`Are you sure you want to delete "${playlistName}"? This action cannot be undone.`)) {
+      return
+    }
+
     try {
       await deletePlaylist(userId, playlistId)
       onPlaylistUpdate()
@@ -91,7 +129,7 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">My Playlists</h2>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-purple-600 hover:bg-purple-700">
               <Plus className="w-4 h-4 mr-2" />
@@ -107,6 +145,7 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
                 placeholder="Playlist name"
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleCreatePlaylist()}
                 className="bg-gray-800 border-gray-600 text-white"
               />
               <Button
@@ -147,6 +186,10 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
                       <DropdownMenuItem onClick={() => setSelectedPlaylist(playlist)} className="cursor-pointer">
                         <Music className="w-4 h-4 mr-2" />
                         View Songs
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => openRenameDialog(playlist)} className="cursor-pointer">
+                        <Edit className="w-4 h-4 mr-2" />
+                        Rename Playlist
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleDeletePlaylist(playlist.id, playlist.name)}
@@ -197,6 +240,43 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Rename Playlist Dialog */}
+      {renamePlaylist && (
+        <Dialog open={!!renamePlaylist} onOpenChange={() => setRenamePlaylist(null)}>
+          <DialogContent className="bg-gray-900 border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-white">Rename Playlist</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input
+                placeholder="New playlist name"
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleRenamePlaylist()}
+                className="bg-gray-800 border-gray-600 text-white"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleRenamePlaylist}
+                  disabled={isRenaming || !renameValue.trim() || renameValue === renamePlaylist.name}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                >
+                  {isRenaming ? "Renaming..." : "Rename"}
+                </Button>
+                <Button
+                  onClick={() => setRenamePlaylist(null)}
+                  variant="outline"
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Playlist Detail Dialog */}

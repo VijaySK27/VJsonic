@@ -4,12 +4,18 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight, Play, Clock } from "lucide-react"
-import type { Song } from "@/types/music"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { ChevronLeft, ChevronRight, Play, Clock, MoreVertical, Plus } from "lucide-react"
+import type { Song, Playlist } from "@/types/music"
 import { searchSongs } from "@/lib/api"
+import { addSongToPlaylist, createPlaylist } from "@/lib/indexdb"
+import { toast } from "@/hooks/use-toast"
 
 interface HomePageProps {
   onPlaySong: (song: Song, playlist: Song[], index: number) => void
+  userId: string
+  playlists: Playlist[]
+  onPlaylistUpdate: () => void
 }
 
 interface SongCategory {
@@ -19,7 +25,7 @@ interface SongCategory {
   loading: boolean
 }
 
-export function HomePage({ onPlaySong }: HomePageProps) {
+export function HomePage({ onPlaySong, userId, playlists, onPlaylistUpdate }: HomePageProps) {
   const [categories, setCategories] = useState<SongCategory[]>([
     { title: "Trending Tamil Songs", query: "tamil trending", songs: [], loading: true },
     { title: "Love Tamil Songs", query: "tamil love songs", songs: [], loading: true },
@@ -49,6 +55,33 @@ export function HomePage({ onPlaySong }: HomePageProps) {
       }),
     )
     setCategories(updatedCategories)
+  }
+
+  const handleAddToPlaylist = async (song: Song, playlistId?: string) => {
+    try {
+      if (playlistId) {
+        await addSongToPlaylist(userId, playlistId, song)
+        toast({
+          title: "Added to Playlist",
+          description: `"${song.name}" added to playlist successfully.`,
+        })
+      } else {
+        // Create new playlist
+        const playlistName = `My Playlist ${Date.now()}`
+        await createPlaylist(userId, playlistName, [song])
+        toast({
+          title: "Playlist Created",
+          description: `New playlist "${playlistName}" created with "${song.name}".`,
+        })
+        onPlaylistUpdate()
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add song to playlist.",
+        variant: "destructive",
+      })
+    }
   }
 
   const scrollCarousel = (categoryIndex: number, direction: "left" | "right") => {
@@ -120,20 +153,51 @@ export function HomePage({ onPlaySong }: HomePageProps) {
               {category.songs.map((song, songIndex) => (
                 <Card
                   key={song.id}
-                  className="flex-shrink-0 w-48 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-colors group cursor-pointer"
-                  onClick={() => onPlaySong(song, category.songs, songIndex)}
+                  className="flex-shrink-0 w-48 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-colors group"
                 >
                   <CardContent className="p-4">
                     <div className="relative mb-3">
                       <img
                         src={song.image[2]?.url || "/placeholder.svg?height=128&width=192"}
                         alt={song.name}
-                        className="w-full h-32 object-cover rounded-lg"
+                        className="w-full h-32 object-cover rounded-lg cursor-pointer"
+                        onClick={() => onPlaySong(song, category.songs, songIndex)}
                       />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                        <Button size="icon" className="bg-purple-600 hover:bg-purple-700">
-                          <Play className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            className="bg-purple-600 hover:bg-purple-700"
+                            onClick={() => onPlaySong(song, category.songs, songIndex)}
+                          >
+                            <Play className="w-4 h-4" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="icon" variant="secondary" className="bg-white/20 hover:bg-white/30">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleAddToPlaylist(song)}>
+                                <Plus className="w-4 h-4 mr-2" />
+                                Create New Playlist
+                              </DropdownMenuItem>
+                              {playlists.map((playlist) => (
+                                <DropdownMenuItem
+                                  key={playlist.id}
+                                  onClick={() => handleAddToPlaylist(song, playlist.id)}
+                                >
+                                  <Plus className="w-4 h-4 mr-2" />
+                                  Add to {playlist.name}
+                                </DropdownMenuItem>
+                              ))}
+                              {playlists.length === 0 && (
+                                <DropdownMenuItem disabled>No playlists available</DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </div>
                     <h4 className="font-semibold text-white text-sm truncate mb-1">{song.name}</h4>
