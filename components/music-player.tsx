@@ -212,7 +212,7 @@ export function MusicPlayer({
                 className="w-full aspect-square object-cover rounded-2xl shadow-2xl mb-8"
               />
 
-              <h2 className="text-3xl font-bold text-white mb-2">{song.name}</h2>
+              <h2 className="text-3xl font-bold text-white mb-2">{song.name.replace('&quot;','"')}</h2>
               <p className="text-xl text-purple-200 mb-8">{song.artists.primary[0]?.name}</p>
 
               <div className="space-y-4 mb-8">
