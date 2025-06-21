@@ -156,7 +156,7 @@ export function MusicPlayer({
               className="w-12 h-12 rounded-lg object-cover"
             />
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold truncate">{song.name}</h4>
+              <h4 className="font-semibold truncate">{song.name.replaceAll('&quot;','"')}</h4>
               <p className="text-sm text-muted-foreground truncate">{song.artists.primary[0]?.name}</p>
             </div>
             <div className="flex items-center gap-2">
