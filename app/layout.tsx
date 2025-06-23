@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'VJ Sonic',
   description: 'Created with v0',  
   icons: {
-    icon: '../public/icon.svg',
+    icon: '/icon.svg',
   },
   generator: 'v0.dev',
 }
