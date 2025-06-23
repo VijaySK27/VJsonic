@@ -3,7 +3,10 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'VJ Sonic',
-  description: 'Created with v0',
+  description: 'Created with v0',  
+  icons: {
+    icon: '../public/icon.svg',
+  },
   generator: 'v0.dev',
 }
 
