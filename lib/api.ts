@@ -1,6 +1,6 @@
 import type { Song, SearchResponse } from "@/types/music"
 
-const API_BASE_URL = "https://saavn.dev/api"
+const API_BASE_URL = "https://saavn.sumit.co/api";
 
 export async function searchSongs(query: string): Promise<Song[]> {
   try {
