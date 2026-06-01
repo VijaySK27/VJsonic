@@ -1,8 +1,5 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Play, Clock } from "lucide-react"
 import type { Song } from "@/types/music"
 
@@ -19,52 +16,73 @@ export function RecentlyPlayed({ recentlyPlayed, onPlaySong }: RecentlyPlayedPro
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">Recently Played</h2>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <h2 className="font-display text-2xl font-bold text-foreground">Recently Played</h2>
+        {recentlyPlayed.length > 0 && (
+          <span
+            className="text-xs font-medium px-2 py-0.5 rounded-full"
+            style={{ background: 'hsl(42 93% 58% / 0.12)', color: 'hsl(42 93% 58%)' }}
+          >
+            {recentlyPlayed.length}
+          </span>
+        )}
+      </div>
 
       {recentlyPlayed.length === 0 ? (
-        <div className="text-center py-12">
-          <Clock className="w-16 h-16 mx-auto mb-4 text-purple-400" />
-          <h3 className="text-xl font-semibold text-white mb-2">No Recent Songs</h3>
-          <p className="text-purple-200">Songs you play will appear here</p>
+        <div className="text-center py-16">
+          <div
+            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
+            style={{ background: 'hsl(240 38% 14%)', border: '1px solid hsl(240 30% 17%)' }}
+          >
+            <Clock className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <h3 className="font-display text-lg font-semibold text-foreground mb-1">Nothing yet</h3>
+          <p className="text-muted-foreground text-sm">Songs you play will appear here</p>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="space-y-2">
           {recentlyPlayed.map((song, index) => (
-            <Card
+            <div
               key={`${song.id}-${index}`}
-              className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-colors"
+              className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group"
+              style={{ background: 'hsl(240 43% 8%)', border: '1px solid hsl(240 30% 17%)' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = 'hsl(42 93% 58% / 0.25)'
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = 'hsl(240 30% 17%)'
+              }}
             >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={song.image[1]?.url || "/placeholder.svg?height=60&width=60"}
-                    alt={song.name}
-                    className="w-15 h-15 rounded-lg object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white truncate">{song.name}</h3>
-                    <p className="text-purple-200 truncate">{song.artists.primary[0]?.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary" className="bg-purple-600/50 text-white">
-                        {song.language}
-                      </Badge>
-                      <span className="text-sm text-purple-200 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {formatDuration(song.duration)}
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    size="icon"
-                    onClick={() => onPlaySong(song, recentlyPlayed, index)}
-                    className="bg-purple-600 hover:bg-purple-700"
+              <img
+                src={song.image[1]?.url || "/placeholder.svg?height=52&width=52"}
+                alt={song.name}
+                className="w-[52px] h-[52px] rounded-xl object-cover flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground truncate text-sm">{song.name.replaceAll('&quot;', '"')}</p>
+                <p className="text-muted-foreground text-xs truncate mt-0.5">{song.artists.primary[0]?.name}</p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span
+                    className="text-[10px] font-medium px-1.5 py-0.5 rounded-md"
+                    style={{ background: 'hsl(42 93% 58% / 0.12)', color: 'hsl(42 93% 58%)' }}
                   >
-                    <Play className="w-4 h-4" />
-                  </Button>
+                    {song.language}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <Clock className="w-2.5 h-2.5" />
+                    {formatDuration(song.duration)}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <button
+                onClick={() => onPlaySong(song, recentlyPlayed, index)}
+                className="w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-95 flex-shrink-0"
+                style={{ background: 'hsl(42 93% 58%)', color: 'hsl(238 50% 4%)' }}
+              >
+                <Play className="w-4 h-4 fill-current" />
+              </button>
+            </div>
           ))}
         </div>
       )}

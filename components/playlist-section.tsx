@@ -1,15 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Plus, Play, MoreVertical, Trash2, Music, Clock, Edit } from "lucide-react"
 import type { Song, Playlist } from "@/types/music"
-import { createPlaylist, deletePlaylist, removeSongFromPlaylist } from "@/lib/indexdb"
+import { createPlaylist, deletePlaylist, removeSongFromPlaylist, renamePlaylist as doRenamePlaylist } from "@/lib/indexdb"
 import { toast } from "@/hooks/use-toast"
 
 interface PlaylistSectionProps {
@@ -30,23 +27,15 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
 
   const handleCreatePlaylist = async () => {
     if (!newPlaylistName.trim()) return
-
     setIsCreating(true)
     try {
       await createPlaylist(userId, newPlaylistName, [])
       setNewPlaylistName("")
       setIsDialogOpen(false)
       onPlaylistUpdate()
-      toast({
-        title: "Playlist Created",
-        description: `"${newPlaylistName}" playlist created successfully.`,
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create playlist.",
-        variant: "destructive",
-      })
+      toast({ title: "Playlist Created", description: `"${newPlaylistName}" created successfully.` })
+    } catch {
+      toast({ title: "Error", description: "Failed to create playlist.", variant: "destructive" })
     } finally {
       setIsCreating(false)
     }
@@ -54,23 +43,15 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
 
   const handleRenamePlaylist = async () => {
     if (!renameValue.trim() || !renamePlaylist) return
-
     setIsRenaming(true)
     try {
-      await renamePlaylist(userId, renamePlaylist.id, renameValue.trim())
+      await doRenamePlaylist(userId, renamePlaylist.id, renameValue.trim())
       setRenamePlaylist(null)
       setRenameValue("")
       onPlaylistUpdate()
-      toast({
-        title: "Playlist Renamed",
-        description: `Playlist renamed to "${renameValue}" successfully.`,
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to rename playlist.",
-        variant: "destructive",
-      })
+      toast({ title: "Playlist Renamed", description: `Renamed to "${renameValue}".` })
+    } catch {
+      toast({ title: "Error", description: "Failed to rename playlist.", variant: "destructive" })
     } finally {
       setIsRenaming(false)
     }
@@ -82,23 +63,13 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
   }
 
   const handleDeletePlaylist = async (playlistId: string, playlistName: string) => {
-    if (!confirm(`Are you sure you want to delete "${playlistName}"? This action cannot be undone.`)) {
-      return
-    }
-
+    if (!confirm(`Delete "${playlistName}"? This cannot be undone.`)) return
     try {
       await deletePlaylist(userId, playlistId)
       onPlaylistUpdate()
-      toast({
-        title: "Playlist Deleted",
-        description: `"${playlistName}" playlist deleted successfully.`,
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete playlist.",
-        variant: "destructive",
-      })
+      toast({ title: "Playlist Deleted", description: `"${playlistName}" deleted.` })
+    } catch {
+      toast({ title: "Error", description: "Failed to delete playlist.", variant: "destructive" })
     }
   }
 
@@ -106,16 +77,9 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
     try {
       await removeSongFromPlaylist(userId, playlistId, songId)
       onPlaylistUpdate()
-      toast({
-        title: "Song Removed",
-        description: "Song removed from playlist successfully.",
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to remove song from playlist.",
-        variant: "destructive",
-      })
+      toast({ title: "Song Removed", description: "Song removed from playlist." })
+    } catch {
+      toast({ title: "Error", description: "Failed to remove song.", variant: "destructive" })
     }
   }
 
@@ -125,154 +89,183 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
   }
 
+  const inputClass = "h-11 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">My Playlists</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="font-display text-2xl font-bold text-foreground">My Playlists</h2>
+          {playlists.length > 0 && (
+            <span
+              className="text-xs font-medium px-2 py-0.5 rounded-full"
+              style={{ background: 'hsl(42 93% 58% / 0.12)', color: 'hsl(42 93% 58%)' }}
+            >
+              {playlists.length}
+            </span>
+          )}
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-purple-600 hover:bg-purple-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Playlist
-            </Button>
+            <button
+              className="flex items-center gap-2 h-9 px-4 rounded-xl text-sm font-semibold transition-all"
+              style={{ background: 'hsl(42 93% 58%)', color: 'hsl(238 50% 4%)' }}
+            >
+              <Plus className="w-4 h-4" />
+              New Playlist
+            </button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-900 border-gray-700">
+          <DialogContent className="bg-card border-border">
             <DialogHeader>
-              <DialogTitle className="text-white">Create New Playlist</DialogTitle>
+              <DialogTitle className="font-display text-foreground">New Playlist</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-3 pt-2">
               <Input
                 placeholder="Playlist name"
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleCreatePlaylist()}
-                className="bg-gray-800 border-gray-600 text-white"
+                className={inputClass}
+                autoFocus
               />
-              <Button
+              <button
                 onClick={handleCreatePlaylist}
                 disabled={isCreating || !newPlaylistName.trim()}
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full h-11 rounded-xl text-sm font-semibold disabled:opacity-50 transition-all"
+                style={{ background: 'hsl(42 93% 58%)', color: 'hsl(238 50% 4%)' }}
               >
-                {isCreating ? "Creating..." : "Create Playlist"}
-              </Button>
+                {isCreating ? "Creating…" : "Create Playlist"}
+              </button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
       {playlists.length === 0 ? (
-        <div className="text-center py-12">
-          <Music className="w-16 h-16 mx-auto mb-4 text-purple-400" />
-          <h3 className="text-xl font-semibold text-white mb-2">No Playlists Yet</h3>
-          <p className="text-purple-200">Create your first playlist to organize your favorite songs</p>
+        <div className="text-center py-16">
+          <div
+            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
+            style={{ background: 'hsl(240 38% 14%)', border: '1px solid hsl(240 30% 17%)' }}
+          >
+            <Music className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <h3 className="font-display text-lg font-semibold text-foreground mb-1">No Playlists Yet</h3>
+          <p className="text-muted-foreground text-sm">Create a playlist to organize your favorite songs</p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {playlists.map((playlist) => (
-            <Card
+            <div
               key={playlist.id}
-              className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-colors"
+              className="rounded-xl overflow-hidden transition-all duration-200"
+              style={{ background: 'hsl(240 43% 8%)', border: '1px solid hsl(240 30% 17%)' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = 'hsl(42 93% 58% / 0.25)'
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = 'hsl(240 30% 17%)'
+              }}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white truncate">{playlist.name}</CardTitle>
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="font-display font-semibold text-foreground truncate">{playlist.name}</h3>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="icon" variant="ghost" className="text-white hover:bg-white/20">
+                      <button className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 mt-0.5">
                         <MoreVertical className="w-4 h-4" />
-                      </Button>
+                      </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => setSelectedPlaylist(playlist)} className="cursor-pointer">
+                      <DropdownMenuItem onClick={() => setSelectedPlaylist(playlist)}>
                         <Music className="w-4 h-4 mr-2" />
                         View Songs
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => openRenameDialog(playlist)} className="cursor-pointer">
+                      <DropdownMenuItem onClick={() => openRenameDialog(playlist)}>
                         <Edit className="w-4 h-4 mr-2" />
-                        Rename Playlist
+                        Rename
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleDeletePlaylist(playlist.id, playlist.name)}
-                        className="text-red-600 cursor-pointer"
+                        className="text-destructive focus:text-destructive"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Delete Playlist
+                        Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <p className="text-purple-200 text-sm">
+                <p className="text-xs text-muted-foreground mb-3">
                   {playlist.songs.length} song{playlist.songs.length !== 1 ? "s" : ""}
                 </p>
-              </CardHeader>
-              <CardContent className="pt-0">
+
                 {playlist.songs.length > 0 ? (
                   <div className="space-y-2">
                     {playlist.songs.slice(0, 3).map((song) => (
                       <div key={song.id} className="flex items-center gap-2">
                         <img
-                          src={song.image[0]?.url || "/placeholder.svg?height=30&width=30"}
+                          src={song.image[0]?.url || "/placeholder.svg?height=28&width=28"}
                           alt={song.name}
-                          className="w-8 h-8 rounded object-cover"
+                          className="w-7 h-7 rounded-lg object-cover flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm truncate">{song.name}</p>
-                          <p className="text-purple-200 text-xs truncate">{song.artists.primary[0]?.name}</p>
+                          <p className="text-xs font-medium text-foreground truncate">{song.name.replaceAll('&quot;', '"')}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{song.artists.primary[0]?.name}</p>
                         </div>
                       </div>
                     ))}
                     {playlist.songs.length > 3 && (
-                      <p className="text-purple-200 text-xs">+{playlist.songs.length - 3} more songs</p>
+                      <p className="text-[10px] text-muted-foreground pl-9">+{playlist.songs.length - 3} more</p>
                     )}
-                    <Button
-                      size="sm"
+                    <button
                       onClick={() => onPlaySong(playlist.songs[0], playlist.songs, 0)}
-                      className="w-full mt-3 bg-purple-600 hover:bg-purple-700"
+                      className="w-full mt-2 h-9 flex items-center justify-center gap-2 rounded-xl text-xs font-semibold transition-all"
+                      style={{ background: 'hsl(42 93% 58% / 0.12)', color: 'hsl(42 93% 58%)' }}
                     >
-                      <Play className="w-4 h-4 mr-2" />
+                      <Play className="w-3.5 h-3.5 fill-current" />
                       Play All
-                    </Button>
+                    </button>
                   </div>
                 ) : (
-                  <p className="text-purple-200 text-sm">No songs in this playlist</p>
+                  <p className="text-xs text-muted-foreground">No songs added yet</p>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Rename Playlist Dialog */}
+      {/* Rename Dialog */}
       {renamePlaylist && (
         <Dialog open={!!renamePlaylist} onOpenChange={() => setRenamePlaylist(null)}>
-          <DialogContent className="bg-gray-900 border-gray-700">
+          <DialogContent className="bg-card border-border">
             <DialogHeader>
-              <DialogTitle className="text-white">Rename Playlist</DialogTitle>
+              <DialogTitle className="font-display text-foreground">Rename Playlist</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-3 pt-2">
               <Input
-                placeholder="New playlist name"
+                placeholder="New name"
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleRenamePlaylist()}
-                className="bg-gray-800 border-gray-600 text-white"
+                className={inputClass}
                 autoFocus
               />
               <div className="flex gap-2">
-                <Button
+                <button
                   onClick={handleRenamePlaylist}
                   disabled={isRenaming || !renameValue.trim() || renameValue === renamePlaylist.name}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  className="flex-1 h-11 rounded-xl text-sm font-semibold disabled:opacity-50 transition-all"
+                  style={{ background: 'hsl(42 93% 58%)', color: 'hsl(238 50% 4%)' }}
                 >
-                  {isRenaming ? "Renaming..." : "Rename"}
-                </Button>
-                <Button
+                  {isRenaming ? "Renaming…" : "Rename"}
+                </button>
+                <button
                   onClick={() => setRenamePlaylist(null)}
-                  variant="outline"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  className="h-11 px-5 rounded-xl text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  style={{ background: 'hsl(240 38% 14%)', border: '1px solid hsl(240 30% 17%)' }}
                 >
                   Cancel
-                </Button>
+                </button>
               </div>
             </div>
           </DialogContent>
@@ -282,51 +275,53 @@ export function PlaylistSection({ playlists, onPlaySong, onPlaylistUpdate, userI
       {/* Playlist Detail Dialog */}
       {selectedPlaylist && (
         <Dialog open={!!selectedPlaylist} onOpenChange={() => setSelectedPlaylist(null)}>
-          <DialogContent className="bg-gray-900 border-gray-700 max-w-2xl">
+          <DialogContent className="bg-card border-border max-w-2xl">
             <DialogHeader>
-              <DialogTitle className="text-white">{selectedPlaylist.name}</DialogTitle>
+              <DialogTitle className="font-display text-foreground">{selectedPlaylist.name}</DialogTitle>
             </DialogHeader>
-            <div className="max-h-96 overflow-y-auto space-y-2">
+            <div className="max-h-96 overflow-y-auto space-y-1.5 pr-1">
               {selectedPlaylist.songs.length === 0 ? (
-                <p className="text-purple-200 text-center py-8">No songs in this playlist</p>
+                <p className="text-muted-foreground text-sm text-center py-8">No songs in this playlist</p>
               ) : (
                 selectedPlaylist.songs.map((song, index) => (
-                  <div key={song.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10">
+                  <div
+                    key={song.id}
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-secondary transition-colors"
+                  >
                     <img
-                      src={song.image[1]?.url || "/placeholder.svg?height=50&width=50"}
+                      src={song.image[1]?.url || "/placeholder.svg?height=44&width=44"}
                       alt={song.name}
-                      className="w-12 h-12 rounded object-cover"
+                      className="w-11 h-11 rounded-xl object-cover flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-white font-medium truncate">{song.name}</h4>
-                      <p className="text-purple-200 text-sm truncate">{song.artists.primary[0]?.name}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{song.name.replaceAll('&quot;', '"')}</p>
+                      <p className="text-xs text-muted-foreground truncate">{song.artists.primary[0]?.name}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary" className="bg-purple-600/50 text-white text-xs">
+                        <span
+                          className="text-[10px] font-medium px-1.5 py-0.5 rounded-md"
+                          style={{ background: 'hsl(42 93% 58% / 0.12)', color: 'hsl(42 93% 58%)' }}
+                        >
                           {song.language}
-                        </Badge>
-                        <span className="text-xs text-purple-200 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
+                        </span>
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-2.5 h-2.5" />
                           {formatDuration(song.duration)}
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
                         onClick={() => onPlaySong(song, selectedPlaylist.songs, index)}
-                        className="w-8 h-8 text-white hover:bg-white/20"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-primary transition-colors"
                       >
-                        <Play className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
+                        <Play className="w-3.5 h-3.5" />
+                      </button>
+                      <button
                         onClick={() => handleRemoveSong(selectedPlaylist.id, song.id)}
-                        className="w-8 h-8 text-red-400 hover:bg-red-400/20"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-destructive transition-colors"
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))

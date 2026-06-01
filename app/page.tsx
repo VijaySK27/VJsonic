@@ -121,24 +121,33 @@ export default function Home() {
         return <RecentlyPlayed recentlyPlayed={recentlyPlayed} onPlaySong={playSong} />
       case "player":
         return (
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+          <div className="rounded-2xl bg-card border border-border p-8">
             {currentSong ? (
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-white mb-4">Now Playing</h2>
-                <div className="max-w-md mx-auto">
-                  <img
-                    src={currentSong.image[2]?.url || "/placeholder.svg?height=300&width=300"}
-                    alt={currentSong.name}
-                    className="w-full aspect-square object-cover rounded-lg mb-4"
-                  />
-                  <h3 className="text-xl font-semibold text-white">{currentSong.name}</h3>
-                  <p className="text-purple-200">{currentSong.artists.primary[0]?.name}</p>
+                <p className="text-xs font-medium text-primary uppercase tracking-[0.2em] mb-4">Now Playing</p>
+                <div className="max-w-xs mx-auto">
+                  <div className="relative">
+                    <div
+                      className="absolute inset-[-3px] rounded-3xl"
+                      style={{ boxShadow: isPlaying ? '0 0 40px hsl(42 93% 58% / 0.35)' : 'none', transition: 'box-shadow 0.5s ease' }}
+                    />
+                    <img
+                      src={currentSong.image[2]?.url || "/placeholder.svg?height=300&width=300"}
+                      alt={currentSong.name}
+                      className="w-full aspect-square object-cover rounded-2xl"
+                    />
+                  </div>
+                  <h3 className="font-display text-2xl font-bold text-foreground mt-5 mb-1">{currentSong.name}</h3>
+                  <p className="text-muted-foreground">{currentSong.artists.primary[0]?.name}</p>
                 </div>
               </div>
             ) : (
-              <div className="text-center text-white">
-                <Music className="w-16 h-16 mx-auto mb-4 text-purple-400" />
-                <p>No song selected. Search and play a song to get started!</p>
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-secondary border border-border mb-4">
+                  <Music className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-display text-xl font-semibold text-foreground mb-2">Nothing playing</h3>
+                <p className="text-muted-foreground text-sm">Search and play a song to get started</p>
               </div>
             )}
           </div>
@@ -156,18 +165,53 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 pb-32">
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-8 flex items-center justify-between">
+    <div className="relative min-h-screen bg-background pb-36 overflow-x-hidden">
+      {/* Atmosphere blobs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div
+          className="absolute top-[-20%] left-[-8%] w-[700px] h-[700px] rounded-full blur-[160px] animate-float-a"
+          style={{ background: 'hsl(42 93% 58% / 0.07)' }}
+        />
+        <div
+          className="absolute bottom-[-25%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[130px] animate-float-b"
+          style={{ background: 'hsl(322 80% 50% / 0.05)' }}
+        />
+        {/* Kolam dot grid */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, hsl(42 93% 58% / 0.05) 1.5px, transparent 1.5px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+      </div>
+
+      {/* Main content */}
+      <div className="relative z-10 container mx-auto px-4 py-6">
+        {/* Header */}
+        <header className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Music className="w-10 h-10 text-purple-400" />
+            {/* Logo mark */}
+            <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-secondary border border-border">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current" style={{ color: 'hsl(42 93% 58%)' }}>
+                <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z" />
+              </svg>
+              <span
+                className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[8px] font-black flex items-center justify-center"
+                style={{ background: 'hsl(42 93% 58%)', color: 'hsl(238 50% 4%)' }}
+              >
+                VJ
+              </span>
+            </div>
             <div>
-              <h1 className="text-4xl font-bold text-white">VJ Sonic</h1>
-              <p className="text-purple-200">Your ultimate Tamil music experience</p>
+              <h1 className="font-display text-3xl font-black text-gold-gradient tracking-tight leading-none">
+                VJ Sonic
+              </h1>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Tamil music · unlimited</p>
             </div>
           </div>
           <UserProfile user={currentUser} onLogout={handleUserLogout} />
-        </div>
+        </header>
 
         <div className="space-y-6">{renderContent()}</div>
       </div>

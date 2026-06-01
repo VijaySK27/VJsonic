@@ -10,6 +10,10 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			display: ['var(--font-fraunces)', 'Georgia', 'serif'],
+  			sans: ['var(--font-dm-sans)', 'system-ui', 'sans-serif'],
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -69,25 +73,51 @@ const config: Config = {
   		},
   		keyframes: {
   			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
+  				from: { height: '0' },
+  				to: { height: 'var(--radix-accordion-content-height)' }
   			},
   			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
-  			}
+  				from: { height: 'var(--radix-accordion-content-height)' },
+  				to: { height: '0' }
+  			},
+  			'vinyl-spin': {
+  				to: { transform: 'rotate(360deg)' }
+  			},
+  			'glow-breathe': {
+  				'0%, 100%': { opacity: '0.3' },
+  				'50%': { opacity: '0.9' }
+  			},
+  			'float-a': {
+  				'0%, 100%': { transform: 'translate(0, 0)' },
+  				'50%': { transform: 'translate(40px, -60px)' }
+  			},
+  			'float-b': {
+  				'0%, 100%': { transform: 'translate(0, 0)' },
+  				'50%': { transform: 'translate(-50px, 40px)' }
+  			},
+  			'slide-up-in': {
+  				from: { transform: 'translateY(20px)', opacity: '0' },
+  				to: { transform: 'translateY(0)', opacity: '1' }
+  			},
+  			'scale-in': {
+  				from: { transform: 'scale(0.95)', opacity: '0' },
+  				to: { transform: 'scale(1)', opacity: '1' }
+  			},
+  			'shimmer-pass': {
+  				'0%': { backgroundPosition: '-200% 0' },
+  				'100%': { backgroundPosition: '200% 0' }
+  			},
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'vinyl-spin': 'vinyl-spin 4s linear infinite',
+  			'vinyl-spin-slow': 'vinyl-spin 9s linear infinite',
+  			'glow-breathe': 'glow-breathe 2.5s ease-in-out infinite',
+  			'float-a': 'float-a 12s ease-in-out infinite',
+  			'float-b': 'float-b 15s ease-in-out infinite',
+  			'slide-up-in': 'slide-up-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+  			'scale-in': 'scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
   		}
   	}
   },

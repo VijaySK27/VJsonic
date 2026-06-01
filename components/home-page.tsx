@@ -1,11 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { ChevronLeft, ChevronRight, Play, Clock, MoreVertical, Plus } from "lucide-react"
+import { ChevronLeft, ChevronRight, Play, Plus, MoreVertical, Clock } from "lucide-react"
 import type { Song, Playlist } from "@/types/music"
 import { searchSongs } from "@/lib/api"
 import { addSongToPlaylist, createPlaylist } from "@/lib/indexdb"
@@ -61,37 +58,22 @@ export function HomePage({ onPlaySong, userId, playlists, onPlaylistUpdate }: Ho
     try {
       if (playlistId) {
         await addSongToPlaylist(userId, playlistId, song)
-        toast({
-          title: "Added to Playlist",
-          description: `"${song.name}" added to playlist successfully.`,
-        })
+        toast({ title: "Added to Playlist", description: `"${song.name}" added successfully.` })
       } else {
-        // Create new playlist
         const playlistName = `My Playlist ${Date.now()}`
         await createPlaylist(userId, playlistName, [song])
-        toast({
-          title: "Playlist Created",
-          description: `New playlist "${playlistName}" created with "${song.name}".`,
-        })
+        toast({ title: "Playlist Created", description: `"${playlistName}" created.` })
         onPlaylistUpdate()
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add song to playlist.",
-        variant: "destructive",
-      })
+    } catch {
+      toast({ title: "Error", description: "Failed to add song to playlist.", variant: "destructive" })
     }
   }
 
   const scrollCarousel = (categoryIndex: number, direction: "left" | "right") => {
     const carousel = document.getElementById(`carousel-${categoryIndex}`)
     if (carousel) {
-      const scrollAmount = 300
-      carousel.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      })
+      carousel.scrollBy({ left: direction === "left" ? -300 : 300, behavior: "smooth" })
     }
   }
 
@@ -103,116 +85,159 @@ export function HomePage({ onPlaySong, userId, playlists, onPlaylistUpdate }: Ho
 
   return (
     <div className="space-y-8">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-white mb-2">Welcome to VJ Sonic</h2>
-        <p className="text-purple-200">Your ultimate destination for Tamil music</p>
+      {/* Welcome header */}
+      <div>
+        <h2 className="font-display text-3xl font-bold text-foreground mb-1">
+          Good listening.
+        </h2>
+        <p className="text-muted-foreground text-sm">Curated Tamil music, always fresh</p>
       </div>
 
       {categories.map((category, categoryIndex) => (
-        <div key={category.title} className="space-y-4">
+        <div key={category.title} className="space-y-3">
+          {/* Section header */}
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-white">{category.title}</h3>
-            <div className="hidden md:flex gap-2">
-              <Button
-                size="icon"
-                variant="ghost"
+            <h3 className="font-display text-base font-semibold text-foreground">{category.title}</h3>
+            <div className="hidden md:flex gap-1">
+              <button
                 onClick={() => scrollCarousel(categoryIndex, "left")}
-                className="w-8 h-8 text-white hover:bg-white/20"
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                style={{ background: 'hsl(240 38% 14%)' }}
               >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
                 onClick={() => scrollCarousel(categoryIndex, "right")}
-                className="w-8 h-8 text-white hover:bg-white/20"
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                style={{ background: 'hsl(240 38% 14%)' }}
               >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
 
+          {/* Cards */}
           {category.loading ? (
-            <div className="flex gap-4 overflow-hidden">
+            <div className="flex gap-3 overflow-hidden">
               {[...Array(5)].map((_, i) => (
-                <Card key={i} className="flex-shrink-0 w-48 bg-white/10 backdrop-blur-sm border-white/20">
-                  <CardContent className="p-4">
-                    <div className="w-full h-32 bg-white/20 rounded-lg mb-3 animate-pulse" />
-                    <div className="h-4 bg-white/20 rounded mb-2 animate-pulse" />
-                    <div className="h-3 bg-white/20 rounded animate-pulse" />
-                  </CardContent>
-                </Card>
+                <div key={i} className="flex-shrink-0 w-44 rounded-xl overflow-hidden" style={{ background: 'hsl(240 43% 8%)' }}>
+                  <div
+                    className="w-full h-28 rounded-t-none"
+                    style={{
+                      background: 'linear-gradient(90deg, hsl(240 43% 8%) 25%, hsl(240 38% 14%) 50%, hsl(240 43% 8%) 75%)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer-pass 1.8s infinite',
+                    }}
+                  />
+                  <div className="p-3 space-y-2">
+                    <div
+                      className="h-3 rounded-full w-3/4"
+                      style={{
+                        background: 'linear-gradient(90deg, hsl(240 43% 8%) 25%, hsl(240 38% 14%) 50%, hsl(240 43% 8%) 75%)',
+                        backgroundSize: '200% 100%',
+                        animation: 'shimmer-pass 1.8s 0.1s infinite',
+                      }}
+                    />
+                    <div
+                      className="h-2.5 rounded-full w-1/2"
+                      style={{
+                        background: 'linear-gradient(90deg, hsl(240 43% 8%) 25%, hsl(240 38% 14%) 50%, hsl(240 43% 8%) 75%)',
+                        backgroundSize: '200% 100%',
+                        animation: 'shimmer-pass 1.8s 0.2s infinite',
+                      }}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
             <div
               id={`carousel-${categoryIndex}`}
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
+              className="flex gap-3 overflow-x-auto scrollbar-hide pb-1"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {category.songs.map((song, songIndex) => (
-                <Card
+                <div
                   key={song.id}
-                  className="flex-shrink-0 w-48 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-colors group"
+                  className="flex-shrink-0 w-44 rounded-xl overflow-hidden group cursor-pointer transition-all duration-200"
+                  style={{
+                    background: 'hsl(240 43% 8%)',
+                    border: '1px solid hsl(240 30% 17%)',
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLDivElement).style.borderColor = 'hsl(42 93% 58% / 0.3)'
+                    ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 20px hsl(42 93% 58% / 0.1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLDivElement).style.borderColor = 'hsl(240 30% 17%)'
+                    ;(e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
+                  }}
                 >
-                  <CardContent className="p-4">
-                    <div className="relative mb-3">
-                      <img
-                        src={song.image[2]?.url || "/placeholder.svg?height=128&width=192"}
-                        alt={song.name}
-                        className="w-full h-32 object-cover rounded-lg cursor-pointer"
+                  {/* Image */}
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={song.image[2]?.url || "/placeholder.svg?height=128&width=192"}
+                      alt={song.name}
+                      className="w-full h-28 object-cover transition-transform duration-300 group-hover:scale-105"
+                      onClick={() => onPlaySong(song, category.songs, songIndex)}
+                    />
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+                      <button
+                        className="w-9 h-9 flex items-center justify-center rounded-xl transition-all active:scale-95"
+                        style={{ background: 'hsl(42 93% 58%)', color: 'hsl(238 50% 4%)', boxShadow: '0 0 16px hsl(42 93% 58% / 0.5)' }}
                         onClick={() => onPlaySong(song, category.songs, songIndex)}
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                        <div className="flex gap-2">
-                          <Button
-                            size="icon"
-                            className="bg-purple-600 hover:bg-purple-700"
-                            onClick={() => onPlaySong(song, category.songs, songIndex)}
+                      >
+                        <Play className="w-4 h-4 fill-current" />
+                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className="w-9 h-9 flex items-center justify-center rounded-xl text-foreground transition-colors"
+                            style={{ background: 'hsl(240 38% 14%)' }}
                           >
-                            <Play className="w-4 h-4" />
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size="icon" variant="secondary" className="bg-white/20 hover:bg-white/30">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleAddToPlaylist(song)}>
-                                <Plus className="w-4 h-4 mr-2" />
-                                Create New Playlist
-                              </DropdownMenuItem>
-                              {playlists.map((playlist) => (
-                                <DropdownMenuItem
-                                  key={playlist.id}
-                                  onClick={() => handleAddToPlaylist(song, playlist.id)}
-                                >
-                                  <Plus className="w-4 h-4 mr-2" />
-                                  Add to {playlist.name}
-                                </DropdownMenuItem>
-                              ))}
-                              {playlists.length === 0 && (
-                                <DropdownMenuItem disabled>No playlists available</DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleAddToPlaylist(song)}>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Create New Playlist
+                          </DropdownMenuItem>
+                          {playlists.map((playlist) => (
+                            <DropdownMenuItem key={playlist.id} onClick={() => handleAddToPlaylist(song, playlist.id)}>
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add to {playlist.name}
+                            </DropdownMenuItem>
+                          ))}
+                          {playlists.length === 0 && (
+                            <DropdownMenuItem disabled>No playlists available</DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <h4 className="font-semibold text-white text-sm truncate mb-1">{song.name}</h4>
-                    <p className="text-purple-200 text-xs truncate mb-2">{song.artists.primary[0]?.name}</p>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="p-3">
+                    <p className="text-sm font-semibold text-foreground truncate mb-0.5">
+                      {song.name.replaceAll('&quot;', '"')}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate mb-2">{song.artists.primary[0]?.name}</p>
                     <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="bg-purple-600/50 text-white text-xs">
+                      <span
+                        className="text-[10px] font-medium px-1.5 py-0.5 rounded-md"
+                        style={{ background: 'hsl(42 93% 58% / 0.12)', color: 'hsl(42 93% 58%)' }}
+                      >
                         {song.language}
-                      </Badge>
-                      <span className="text-xs text-purple-200 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                      </span>
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Clock className="w-2.5 h-2.5" />
                         {formatDuration(song.duration)}
                       </span>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           )}
